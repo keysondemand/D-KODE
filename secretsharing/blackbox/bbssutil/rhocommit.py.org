@@ -1,0 +1,80 @@
+import sys  
+sys.path += ['./','../', '../../', '../../../']
+
+import numpy as np 
+#from charm.toolbox.ecgroup   import ECGroup, ZR, G
+
+from conf.groupparam             import *
+from secretsharing.blackbox.bbss import *
+
+def rhoCommit(M, malicious=0):
+
+    S, RHO           = bbssShareGen4DKG(M) #RHO[0] is the random secret 
+    S_dash, RHO_dash = bbssShareGen4DKG(M) 
+
+    rho_commits = []
+    rho_commit_strings = []
+
+    dlog_commits = []
+    dlog_commit_strings = []
+
+    # Importing g and h from common parameters now 
+    #g = group.encode(decoded_g, True)
+    #h = group.encode(decoded_h, True)
+    g = group.encode(decoded_g)
+    h = group.encode(decoded_h)
+
+    for i in range(len(RHO)):
+        commit_val = (g ** RHO[i]) * (h ** RHO_dash[i])
+        dlog_commit_val = (g ** RHO[i]) 
+
+        if malicious:
+            commit_val = group.random(G)
+            dlog_commit_val = group.random(G)
+
+        rho_commits.append(commit_val)
+        rho_commit_strings.append(group.serialize(commit_val))
+
+        dlog_commits.append(dlog_commit_val)
+        dlog_commit_strings.append(group.serialize(dlog_commit_val))
+    return S, S_dash, rho_commits , rho_commit_strings,  RHO, RHO_dash, dlog_commits, dlog_commit_strings
+
+
+def rhoCommitPSS(M, share, share_dash):
+
+    if debug:
+        print("share and share_dash in rhoCommitPSS:", share, share_dash)
+
+    S, RHO           = bbssShareGen4PSS(M, share) #RHO[0] is the random secret 
+    S_dash, RHO_dash = bbssShareGen4PSS(M, share_dash) 
+
+    rho_commits = []
+    rho_commit_strings = []
+
+    dlog_commits = []
+    dlog_commit_strings = []
+
+    # Importing g and h from common parameters now 
+    #g = group.encode(decoded_g, True)
+    #h = group.encode(decoded_h, True)
+    g = group.encode(decoded_g)
+    h = group.encode(decoded_h)
+
+    for i in range(len(RHO)):
+        commit_val = (g ** RHO[i]) * (h ** RHO_dash[i])
+
+        dlog_commit_val = (g ** RHO[i]) 
+
+        rho_commits.append(commit_val)
+        rho_commit_strings.append(group.serialize(commit_val))
+
+        dlog_commits.append(dlog_commit_val)
+        dlog_commit_strings.append(group.serialize(dlog_commit_val))
+    return S, S_dash, rho_commits , rho_commit_strings,  RHO, RHO_dash, dlog_commits, dlog_commit_strings
+
+
+if __name__ == "__main__":
+    M = np.loadtxt("M.txt", dtype=int)
+    M = np.array(M)
+    print(rhoCommit(M))
+
