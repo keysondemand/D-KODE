@@ -1,4 +1,4 @@
-## KODE 
+## D-KODE 
 
 **Protocol to generate secret keys on-the-fly using key-homomorphic PRFs and black-box secret sharing** 
 
